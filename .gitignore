@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+.git/
+.venv/
+.vscode/
+.env/
+# data/cursor_2.0.77_amd64.deb
+data/cursor_*.deb
