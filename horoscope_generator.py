@@ -6,31 +6,21 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import pandas as pd
 
 from openai_agent import GPT_Validator
+from prompts import HOROSCOPE_PROMPT
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DATA_DIR = os.path.join(BASE_DIR, "horoscope_data")
-DEFAULT_PROMPT_PATH = os.path.join(DEFAULT_DATA_DIR, "промт.txt")
 DEFAULT_OUTPUT_DIR = os.path.join(BASE_DIR, "horoscope_results")
 
 # Настройки для запуска из IDE: включите флаг enabled и укажите параметры ниже.
 IDE_RUN_CONFIG = {
     "enabled": False,
     "data_dir": DEFAULT_DATA_DIR,
-    "prompt_path": DEFAULT_PROMPT_PATH,
     "limit": 10,
     "target_file": "Гороскопы 2026 год.xlsx",
     "output_dir": DEFAULT_OUTPUT_DIR,
 }
-
-
-def load_prompt_text(prompt_path: str) -> str:
-    """Считывает промт из файла и добавляет плейсхолдер для данных."""
-    with open(prompt_path, "r", encoding="utf-8") as f:
-        prompt_body = f.read().strip()
-    if "{}" not in prompt_body:
-        prompt_body = f"{prompt_body}\n\nДанные для персонального гороскопа:\n{{}}"
-    return prompt_body
 
 
 def list_xlsx_files(data_dir: str, target_file: Optional[str]) -> List[str]:
@@ -115,13 +105,12 @@ def iter_records(
 
 def generate_horoscopes(
     data_dir: str,
-    prompt_path: str,
     limit: Optional[int],
     target_file: Optional[str],
     output_dir: str,
 ) -> str:
     """Основной цикл генерации гороскопов."""
-    prompt_template = load_prompt_text(prompt_path)
+    prompt_template = HOROSCOPE_PROMPT
     validator = GPT_Validator()
     os.makedirs(output_dir, exist_ok=True)
 
@@ -131,10 +120,22 @@ def generate_horoscopes(
         iter_records(data_dir, target_file, limit), start=1
     ):
         record_context = format_record_context(record)
+        name = normalize_value(record.get("ИО")) or "Сотрудник"
+        position = normalize_value(record.get("Должность")) or "Сотрудник"
+        birthdate = normalize_value(record.get("День рождения")) or "Не указана"
+
         print(f"[{idx}] Обработка записи из файла {os.path.basename(file_path)}")
         print(record_context)
+        
         try:
-            horoscope = validator(prompt_template, record_context)
+            full_prompt = prompt_template.format(
+                name=name,
+                position=position,
+                birthdate=birthdate,
+                context=record_context
+            )
+            # Передаем пробел вторым аргументом, так как контекст уже вшит в промт
+            horoscope = validator(full_prompt, " ")
         except Exception as exc:
             print(f"Ошибка при обращении к LLM: {exc}")
             continue
@@ -165,7 +166,6 @@ def run_from_ide_config() -> bool:
 
     generate_horoscopes(
         data_dir=IDE_RUN_CONFIG.get("data_dir", DEFAULT_DATA_DIR),
-        prompt_path=IDE_RUN_CONFIG.get("prompt_path", DEFAULT_PROMPT_PATH),
         limit=limit_value,
         target_file=IDE_RUN_CONFIG.get("target_file"),
         output_dir=IDE_RUN_CONFIG.get("output_dir", DEFAULT_OUTPUT_DIR),
@@ -181,11 +181,6 @@ def parse_args() -> argparse.Namespace:
         "--data-dir",
         default=DEFAULT_DATA_DIR,
         help="Папка с XLSX файлами (по умолчанию ./horoscope_data)",
-    )
-    parser.add_argument(
-        "--prompt-path",
-        default=DEFAULT_PROMPT_PATH,
-        help="Путь до файла с промтом",
     )
     parser.add_argument(
         "--limit",
@@ -214,7 +209,6 @@ def main() -> None:
     limit = args.limit if args.limit and args.limit > 0 else None
     generate_horoscopes(
         data_dir=args.data_dir,
-        prompt_path=args.prompt_path,
         limit=limit,
         target_file=args.target_file,
         output_dir=args.output_dir,
