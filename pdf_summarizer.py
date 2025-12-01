@@ -105,6 +105,7 @@ def process_pdf_files(data_folder="data"):
         
         # Извлекаем весь текст из PDF
         full_text = extract_text_from_pdf(pdf_path)
+        print(full_text[:300])
         
         if not full_text:
             print(f"Не удалось извлечь текст из файла {pdf_file}\n")

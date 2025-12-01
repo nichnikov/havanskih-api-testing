@@ -188,6 +188,7 @@ def combine_pdfs_and_summarize(pdf_file_list, data_folder="data"):
         
         # Извлекаем весь текст из PDF
         full_text = extract_text_from_pdf(pdf_path)
+        print(full_text[:1000])
         
         if not full_text:
             print(f"Не удалось извлечь текст из файла {pdf_file}\n")
@@ -256,10 +257,10 @@ def combine_pdfs_and_summarize(pdf_file_list, data_folder="data"):
 if __name__ == "__main__":
     # УКАЖИТЕ ЗДЕСЬ СПИСОК PDF ФАЙЛОВ ДЛЯ ОБЪЕДИНЕНИЯ
     # Примеры:
+    pdf_files = ["test_act3.pdf"]
     # pdf_files = ["test_act1.pdf", "test_act2.pdf"]
     # pdf_files = ["test_act1.pdf", "test_act2.pdf", "test_act3.pdf", "test_act4.pdf"]
-    
-    pdf_files = ["test_act1.pdf", "test_act2.pdf", "test_act3.pdf", "test_act1.pdf", "test_act1.pdf"]
+    # pdf_files = ["test_act1.pdf", "test_act2.pdf", "test_act3.pdf", "test_act1.pdf", "test_act1.pdf"]
     
     combine_pdfs_and_summarize(pdf_files, data_folder="data")
 
