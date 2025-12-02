@@ -16,7 +16,7 @@ DEFAULT_OUTPUT_DIR = os.path.join(BASE_DIR, "horoscope_results")
 # Настройки для запуска из IDE: включите флаг enabled и укажите параметры ниже.
 IDE_RUN_CONFIG = {
     "data_dir": DEFAULT_DATA_DIR,
-    "limit": 30,
+    "limit": 1800,
     "target_file": "Гороскопы 2026 год.xlsx",
     "output_dir": DEFAULT_OUTPUT_DIR,
 }
@@ -165,7 +165,7 @@ def generate_horoscopes(
         printable_record["horoscope"] = horoscope
         results.append(printable_record)
 
-        if idx % 10 == 0:
+        if idx % 300 == 0:
             pd.DataFrame(results).to_csv(output_path, index=False)
             print(f"Промежуточное сохранение {len(results)} записей в {output_path}")
 
