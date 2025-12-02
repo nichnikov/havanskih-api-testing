@@ -16,7 +16,7 @@ DEFAULT_OUTPUT_DIR = os.path.join(BASE_DIR, "horoscope_results")
 # Настройки для запуска из IDE: включите флаг enabled и укажите параметры ниже.
 IDE_RUN_CONFIG = {
     "data_dir": DEFAULT_DATA_DIR,
-    "limit": 15,
+    "limit": 30,
     "target_file": "Гороскопы 2026 год.xlsx",
     "output_dir": DEFAULT_OUTPUT_DIR,
 }
@@ -137,6 +137,8 @@ def generate_horoscopes(
         birthdate = normalize_value(record.get("День рождения")) or "Не указана"
         zodiac_sign = normalize_value(record.get("Знак зодиака")) or "Не указан"
         zodiac_animal = normalize_value(record.get("Китайский календарь")) or "Не указан"
+        pinyin = normalize_value(record.get("Пиньинь")) or "Не указан"
+
 
         print(f"[{idx}] Обработка записи из файла {os.path.basename(file_path)}")
         print(record_context)
@@ -149,6 +151,7 @@ def generate_horoscopes(
                 birthdate=birthdate,
                 zodiac_sign=zodiac_sign,
                 zodiac_animal=zodiac_animal,
+                pinyin=pinyin,
                 # context=record_context
             )
             # Передаем пробел вторым аргументом, так как контекст уже вшит в промт
